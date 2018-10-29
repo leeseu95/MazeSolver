@@ -28,32 +28,36 @@ def expandNode(state, matrixMaze, finalX, finalY, colMat, rowMat):
         nodeTemp[0] += 1
         #calcular el costo a traves de la heuristica dada
         distanceFinal = math.sqrt((finalX - nodeTemp[0])**2 + (finalY - nodeTemp[1])**2)
+        cost = distanceFinal
         #appendear el nuevo estado
-        possibleStates.append(createNode(nodeTemp, state, "D", distanceFinal, 0))
+        possibleStates.append(createNode(nodeTemp, state, "D", cost, 0))
     #U
     if (state[0] != 0 and matrixMaze[state[0]-1][state[1]] != 1): #Si se encuentra en cualquier columna 2 o la 3, lo podemos mover a la izquierda
         nodeTemp = state.copy()
         nodeTemp[0] -= 1
         #calcular el costo a traves de la heuristica dada
         distanceFinal = math.sqrt((finalX - nodeTemp[0])**2 + (finalY - nodeTemp[1])**2)
+        cost = distanceFinal
         #appendear el nuevo estado
-        possibleStates.append(createNode(nodeTemp, state, "U", distanceFinal, 0))
+        possibleStates.append(createNode(nodeTemp, state, "U", cost, 0))
     #L
     if (state[1] != 0 and matrixMaze[state[0]][state[1] - 1] != 1): #Si se encuentra en cualquier fila 1 o 2, lo podemos mover hacia abajo
         nodeTemp = state.copy()
         nodeTemp[1] -= 1
         #calcular el costo a traves de la heuristica dada
         distanceFinal = math.sqrt((finalX - nodeTemp[0])**2 + (finalY - nodeTemp[1])**2)
+        cost = distanceFinal
         #appendear el nuevo estado
-        possibleStates.append(createNode(nodeTemp, state, "L", distanceFinal, 0))
+        possibleStates.append(createNode(nodeTemp, state, "L", cost, 0))
     #R
     if (state[1] != colMat - 1 and matrixMaze[state[0]][state[1] + 1] != 1): #Si se encuentra en cualquier fila 1 o 2, lo podemos mover hacia abajo
         nodeTemp = state.copy()
         nodeTemp[1] += 1
         #calcular el costo a traves de la heuristica dada
         distanceFinal = math.sqrt((finalX - nodeTemp[0])**2 + (finalY - nodeTemp[1])**2)
+        cost = distanceFinal
         #appendear el nuevo estado
-        possibleStates.append(createNode(nodeTemp, state, "R", distanceFinal, 0))
+        possibleStates.append(createNode(nodeTemp, state, "R", cost, 0))
     return possibleStates
 
 def aStarSearch(matrixMaze, initX, initY, finalX, finalY, colMat, rowMat):
@@ -64,6 +68,10 @@ def aStarSearch(matrixMaze, initX, initY, finalX, finalY, colMat, rowMat):
     path = [] #el camino completo
     visitedNodes = [] #los nodos que ya hemos visitado
     finalPath = [] #El camino final
+    stringPath = ""
+
+    visitedCount = 0 #cuantos hemos visitado
+    cost = [] #costo del camino
 
     edoInicial = [initX, initY]
     edoFinal = [finalX, finalY]
