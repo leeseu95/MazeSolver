@@ -16,7 +16,6 @@ class Node:
 def createNode(state, parent, movement, cost, visited):
     return Node(state, parent, movement, cost, visited)
 
-
 #Funcion principal definida por el profesor busquedaNoInformada(edoInicial, edoFinal, algoritmo)
 
 def expandNode(state, matrixMaze, finalX, finalY, colMat, rowMat):
@@ -143,4 +142,4 @@ if __name__ == '__main__':
         matrixMaze.append([int(i) for i in str(matrix[i])])
 
     aStarSearch(matrixMaze, ((n-1)-startY), startX, ((n-1)-finalY), finalX, m, n)
-    print("Seconds:" , (time.time() - start_time))
+    print("Seconds: " , (time.time() - start_time))
