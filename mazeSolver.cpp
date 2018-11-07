@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <list>
 
@@ -13,15 +14,19 @@ using namespace std;
 struct Node {
     short x;
     short y;
+    int cost;
     Node* parent;
     char movement;
     float heuristic;
-    Node(short x_, short y_, Node* parent_, char movement_, float heuristic_) {
+    float score;
+    Node(short x_, short y_, Node* parent_, char movement_, float heuristic_, int cost_) {
         x = x_;
         y = y_;
         parent = parent_;
         movement = movement_;
         heuristic = heuristic_;
+        cost = cost_;
+        score = heuristic_ + cost_;
     }
     void printCoords () {
         cout << x << " , " << y << endl;
@@ -53,129 +58,213 @@ struct Matrix {
     } 
 };
 
-void expandNode(Node currentNode, vector<Node> &queue, vector<Node> &visitedNodes, Matrix maze, short finalX, short finalY) {
+void expandNode(Node currentNode, vector<Node> &openSet, vector<Node> &closedSet, map<string, string> &cameFrom, Matrix maze, short finalX, short finalY) {
     // cout << maze(currentNode.x+1, currentNode.y) << endl;
     //Down
     if(currentNode.x != (maze.rows - 1) && maze(currentNode.x+1, currentNode.y) != 1 ) { //Si no esta esta hasta abajo y abajo no es 1
         //Calcular el costo de la heuristica dada
         float distanceFinal = sqrt(pow(finalX - currentNode.x+1, 2) + pow(finalY - currentNode.y, 2));
-        Node tempNode(currentNode.x+1, currentNode.y, &currentNode, 'D', distanceFinal);
+        Node tempNode(currentNode.x+1, currentNode.y, &currentNode, 'D', distanceFinal, currentNode.cost + 1);
         bool visitedFlag = false;
-        for(int i = 0; i < visitedNodes.size(); i++) {
-            if(visitedNodes[i].x == tempNode.x && visitedNodes[i].y == tempNode.y) {
+        for(int i = 0; i < closedSet.size(); i++) {
+            if(closedSet[i].x == tempNode.x && closedSet[i].y == tempNode.y) {
                 visitedFlag = true;
                 break;
             }
         }
-        if(visitedFlag == false) //Si no fue visitada
-            queue.push_back(tempNode);
+        // Si no fue visitada y es un nodo que no ha sido ya descubierto
+        if(visitedFlag == false) {
+            bool foundFlag = false;
+            int index = 0;
+            for(int i = 0; i < openSet.size(); i++) {
+                if(openSet[i].x == tempNode.x && openSet[i].y == tempNode.y) {
+                    foundFlag = true;
+                    index = i;
+                    break;
+                }
+            }
+            if (!foundFlag) openSet.push_back(tempNode);
+            else {
+                // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
+                // habíamos descubierto, lo actualizamos
+                if (tempNode.score < openSet[index].score) {
+                    string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                    string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                    cameFrom[key] = value;
+                }
+            }
+        }
     }
     //Up
     if(currentNode.x != 0 && maze(currentNode.x-1, currentNode.y) != 1 ) { //Si no esta esta hasta arriba y arriba no es 1
         //Calcular el costo de la heuristica dada
         float distanceFinal = sqrt(pow(finalX - currentNode.x-1, 2) + pow(finalY - currentNode.y, 2));
-        Node tempNode(currentNode.x-1, currentNode.y, &currentNode, 'U', distanceFinal);
+        Node tempNode(currentNode.x-1, currentNode.y, &currentNode, 'U', distanceFinal, currentNode.cost + 1);
         bool visitedFlag = false;
-        for(int i = 0; i < visitedNodes.size(); i++) {
-            if(visitedNodes[i].x == tempNode.x && visitedNodes[i].y == tempNode.y) {
+        for(int i = 0; i < closedSet.size(); i++) {
+            if(closedSet[i].x == tempNode.x && closedSet[i].y == tempNode.y) {
                 visitedFlag = true;
                 break;
             }
         }
-        if(visitedFlag == false) //Si no fue visitada
-            queue.push_back(tempNode);
+        // Si no fue visitada y es un nodo que no ha sido ya descubierto
+        if(visitedFlag == false) {
+            bool foundFlag = false;
+            int index = 0;
+            for(int i = 0; i < openSet.size(); i++) {
+                if(openSet[i].x == tempNode.x && openSet[i].y == tempNode.y) {
+                    foundFlag = true;
+                    index = i;
+                    break;
+                }
+            }
+            if (!foundFlag) openSet.push_back(tempNode);
+            else {
+                // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
+                // habíamos descubierto, lo actualizamos
+                if (tempNode.score < openSet[index].score) {
+                    string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                    string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                    cameFrom[key] = value;
+                }
+            }
+        }
     }
     //Right
     if(currentNode.y != (maze.cols-1) && maze(currentNode.x, currentNode.y+1) != 1 ) { //Si no esta hasta la derecha y derecha no es 1
         //Calcular el costo de la heuristica dada
         float distanceFinal = sqrt(pow(finalX - currentNode.x, 2) + pow(finalY - currentNode.y+1, 2));
-        Node tempNode(currentNode.x, currentNode.y+1, &currentNode, 'R', distanceFinal);
+        Node tempNode(currentNode.x, currentNode.y+1, &currentNode, 'R', distanceFinal, currentNode.cost + 1);
         bool visitedFlag = false;
-        for(int i = 0; i < visitedNodes.size(); i++) {
-            if(visitedNodes[i].x == tempNode.x && visitedNodes[i].y == tempNode.y) {
+        for(int i = 0; i < closedSet.size(); i++) {
+            if(closedSet[i].x == tempNode.x && closedSet[i].y == tempNode.y) {
                 visitedFlag = true;
                 break;
             }
         }
-        if(visitedFlag == false) //Si no fue visitada
-            queue.push_back(tempNode);
+        // Si no fue visitada y es un nodo que no ha sido ya descubierto
+        if(visitedFlag == false) {
+            bool foundFlag = false;
+            int index = 0;
+            for(int i = 0; i < openSet.size(); i++) {
+                if(openSet[i].x == tempNode.x && openSet[i].y == tempNode.y) {
+                    foundFlag = true;
+                    index = i;
+                    break;
+                }
+            }
+            if (!foundFlag) openSet.push_back(tempNode);
+            else {
+                // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
+                // habíamos descubierto, lo actualizamos
+                if (tempNode.score < openSet[index].score) {
+                    string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                    string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                    cameFrom[key] = value;
+                }
+            }
+        }
     }
     //Right
     if(currentNode.y != 0 && maze(currentNode.x, currentNode.y-1) != 1 ) { //Si no esta hasta la izquierda e izquierda no es 1
         //Calcular el costo de la heuristica dada
         float distanceFinal = sqrt(pow(finalX - currentNode.x, 2) + pow(finalY - currentNode.y-1, 2));
-        Node tempNode(currentNode.x, currentNode.y-1, &currentNode, 'L', distanceFinal);
+        Node tempNode(currentNode.x, currentNode.y-1, &currentNode, 'L', distanceFinal, currentNode.cost + 1);
         bool visitedFlag = false;
-        for(int i = 0; i < visitedNodes.size(); i++) {
-            if(visitedNodes[i].x == tempNode.x && visitedNodes[i].y == tempNode.y) {
+        for(int i = 0; i < closedSet.size(); i++) {
+            if(closedSet[i].x == tempNode.x && closedSet[i].y == tempNode.y) {
                 visitedFlag = true;
                 break;
             }
         }
-        if(visitedFlag == false) //Si no fue visitada
-            queue.push_back(tempNode);
+        // Si no fue visitada y es un nodo que no ha sido ya descubierto
+        if(visitedFlag == false) {
+            bool foundFlag = false;
+            int index = 0;
+            for(int i = 0; i < openSet.size(); i++) {
+                if(openSet[i].x == tempNode.x && openSet[i].y == tempNode.y) {
+                    foundFlag = true;
+                    index = i;
+                    break;
+                }
+            }
+            if (!foundFlag) openSet.push_back(tempNode);
+            else {
+                // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
+                // habíamos descubierto, lo actualizamos
+                if (tempNode.score < openSet[index].score) {
+                    string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                    string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                    cameFrom[key] = value;
+                }
+            }
+        }
     }
-    // Metemos a visitedNodes, nuestro nodo
-    visitedNodes.push_back(currentNode);
 }
 
-string findPath(Node currentNode) {
+string findPath(Node currentNode, map<string, string> &cameFrom) {
     //Definicion de string temporal
+    string key = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+    string value = cameFrom[key];
     string path = "";
 
-    //Empezamos igualando el primer nodo que si llego al path y luego apuntamos hacia su padre
-    path = path + currentNode.movement;
-    //Apuntamos hacia el padre
-    Node* currentParent = currentNode.parent;
-    while(currentParent != nullptr) {
-        path = path + currentParent->movement;
-        currentParent = currentParent->parent;
+    while (value != "START") {
+        path += value + "\n";
+        key = value;
+        value = cameFrom[key];
     }
+
+    cout << "path:" << endl;
+    cout << path << endl;
 
     return path;
 }
 
 //Funcion para hacer el sort
-bool sortQueue (Node a, Node b) { return (a.heuristic < b.heuristic); }
+bool sortQueue (Node a, Node b) { return (a.score < b.score); }
 
 void aStarSearch(Matrix maze, short initialX, short initialY, short finalX, short finalY) {
     //Arreglos que vamos a utilizar
-    vector<Node> queue; //Queue
-    vector<Node> visitedNodes; //Visited
-    string finalPath = ""; //String del path
+    vector<Node> closedSet; // Set of nodes already evaluated
 
     //Creamos el nodo inicial
-    Node initialNode(initialX, initialY, nullptr, 'H', 0);
+    float heuristic = sqrt(pow(finalX - initialX, 2) + pow(finalY - initialY, 2));
+    Node initialNode(initialX, initialY, nullptr, 'H', heuristic, 0);
 
-    //Lo metemos al queue
-    queue.push_back(initialNode);
-    while(!queue.empty()) {
-        //Sorteamos los Nodos dependiendo de su heuristica
-        sort(queue.begin(), queue.end(), sortQueue);
-        //Se tiene que hacer un back y luego un pop_back(), no se porque pero asi funciona
-        Node currentNode = queue.front();
-        queue.erase(queue.begin()); //Popeamos el primer nodo
+    // The set of currently discovered nodes that are not evaluated yet.
+    // Initially, only the start node is known.
+    vector<Node> openSet;
+    openSet.push_back(initialNode);
 
-        // cout << currentNode.x << " , " << currentNode.y << endl;
+    // For each node, which node it can most efficiently be reached from.
+    // If a node can be reached from many nodes, cameFrom will eventually contain the
+    // most efficient previous step.
+    // cameFrom := an empty map
+    // el key es el elemento y el value es de donde vino.
+    map<string, string> cameFrom;
+    string key = to_string(initialNode.x) + "-" + to_string(initialNode.y);
+    cameFrom[key] = "START";
 
-        //Si ya llegamos al estado final
-        if(currentNode.x == finalX && currentNode.y == finalY) {
-            cout << currentNode.parent->x<< " , " << currentNode.parent->y << endl;
-            // finalPath = findPath(currentNode);
+    // For each node, the cost of getting from the start node to that node.
+    /* gScore := map with default value of Infinity */
+    // Es 1 el costo para todos en nuestro caso
 
-            for(int i = finalPath.length()-1; i >= 0; i--) {
-                cout << finalPath[i];
-            }
-            break;
+    while(!openSet.empty()) {
+        // Sorteamos los nodos dependiendo del score
+        sort(openSet.begin(), openSet.end(), sortQueue);
+        Node currentNode = openSet.front();
+
+        // Checamos si llegamos al goal
+        if (currentNode.x == finalX && currentNode.y == finalY) {
+            findPath(currentNode, cameFrom);
         }
 
-        expandNode(currentNode, queue, visitedNodes, maze, finalX, finalY);
+        move(openSet.begin(), openSet.begin() + 1, back_inserter(closedSet));
+        openSet.erase(openSet.begin());
 
-        //Si ya pasamos por todos los nodos posibles
-        if(queue.size() == 0) {
-            cout << "There is no solution for this problem" << endl;
-        }
+        expandNode(currentNode, openSet, closedSet, cameFrom, maze, finalX, finalY);
     }
+    cout << "End search" << endl;
 }
 
 int main(int argc, char * argv[]) {
@@ -219,63 +308,5 @@ int main(int argc, char * argv[]) {
     }
 
     aStarSearch(maze, initialX, initialY, finalX, finalY);
-
-    //Debug
-    // vector<Node> queueNodes;
-    // Node initialNode(2, 3, nullptr, 'H', 0);
-    // queueNodes.push_back(initialNode);
-
-    // vector<Node> queue; //Queue
-    // vector<Node> visitedNodes; //Visited
-
-    // // Creamos el nodo inicial
-    // Node initialNode(0, 0, nullptr, 'H', 0);
-    // Node node2(2, 2, &initialNode, 'U', 5);
-    // Node node3(4, 4, &node2, 'D', 45);
-    // // cout << node2.parent->x << endl;
-
-    // string path = "";
-
-    // //Empezamos igualando el primer nodo que si llego al path y luego apuntamos hacia su padre
-    // path = path + node3.movement;
-    // //Apuntamos hacia el padre
-    // Node* currentParent = node3.parent;
-    // while(currentParent != nullptr) {
-    //     path = path + currentParent->movement;
-    //     currentParent = currentParent->parent;
-    // }
-    // cout << path << endl;
-
-    // //Lo metemos al queue
-    // queue.push_back(node3);
-    // queue.push_back(initialNode);
-    // queue.push_back(node2);
-
-    // sort(queue.begin(), queue.end(), sortQueue);
-
-    // // cout << queue[0].heuristic << endl << queue[1].heuristic << endl << queue[2].heuristic << endl;
-    // Node currentNode = queue.front();
-    // cout << queue.size() << endl;
-    // queue.erase(queue.begin());
-
-    // // cout << endl << currentNode.heuristic << endl;
-    // cout << queue.size() << endl;
-
-    // string path = "UDUDUDUDUDLLRRURURURUR";
-    // for(int i = path.length()-1; i >= 0; i--) {
-    //     cout << path[i];
-    // }
-
-    // Matrix maze(10, 10);
-    // maze(0, 0) = 3;
-    // maze(1, 0) = 3;
-    // maze(9, 9) = 2;
-    // cout << maze(5, 5) << endl;
-    // for(int i = 0; i < maze.rows; i++) {
-    //     for(int j = 0; j < maze.cols; j++) {
-    //         cout << maze(i, j) << " ";
-    //     }
-    //     cout << endl;
-    // }
-
+    return 0;
 }
