@@ -1,5 +1,5 @@
 const fs = require('fs');
-const stream = fs.createWriteStream(__dirname + "/../generated-maze.txt");
+const stream = fs.createWriteStream("./public/mazes/generated-maze.txt");
 
 // Setup variables
 const size = 10;

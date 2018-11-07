@@ -224,7 +224,7 @@ string findPath(Node currentNode, map<string, string> &cameFrom) {
     //Definicion de string temporal
     string key = to_string(currentNode.x) + "-" + to_string(currentNode.y);
     string value = cameFrom[key];
-    string path = "";
+    string path = key + "\n";
 
     while (value != "START") {
         path += value + "\n";
@@ -277,7 +277,10 @@ void aStarSearch(Matrix maze, short initialX, short initialY, short finalX, shor
 
         // Checamos si llegamos al goal
         if (currentNode.x == finalX && currentNode.y == finalY) {
-            findPath(currentNode, cameFrom);
+            ofstream myfile;
+            myfile.open ("./public/solutions/generated-solution.txt");
+            myfile << findPath(currentNode, cameFrom);
+            myfile.close();
         }
 
         move(openSet.begin(), openSet.begin() + 1, back_inserter(closedSet));
@@ -290,7 +293,7 @@ void aStarSearch(Matrix maze, short initialX, short initialY, short finalX, shor
 
 int main(int argc, char * argv[]) {
     //Tenemos por default el nombre del txt
-    char * mazeText = "maze.txt";
+    char * mazeText = "./public/mazes/generated-maze.txt";
 
     if(argc == 2) { //Si nos dieron los file names
         mazeText = argv[1];
@@ -298,7 +301,7 @@ int main(int argc, char * argv[]) {
 
     //Abrimos el file
     FILE* file_ptr = fopen(mazeText, "r");
-    
+
     if(file_ptr == NULL) {
         cout << "ERROR : Unable to open file " << endl;
         exit(EXIT_FAILURE);
