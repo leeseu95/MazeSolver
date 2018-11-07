@@ -205,14 +205,16 @@ void expandNode(Node currentNode, vector<Node> &openSet, vector<Node> &closedSet
 string findPath(Node currentNode, map<string, string> &cameFrom) {
     //Definicion de string temporal
     string key = to_string(currentNode.x) + "-" + to_string(currentNode.y);
-    string value = cameFrom[key];
+    cout << "key: " << key << endl;
     string path = "";
 
-    while (value != "START") {
-        path += value + "\n";
-        key = value;
-        value = cameFrom[key];
-    }
+    cout << "value: " << cameFrom[key] << endl;
+    cout << "cameFrom size" << cameFrom.size() << endl;
+    /* while (value != "START") { */
+    /*     path += value + "\n"; */
+    /*     key = value; */
+    /*     value = cameFrom[key]; */
+    /* } */
 
     cout << "path:" << endl;
     cout << path << endl;
@@ -222,6 +224,9 @@ string findPath(Node currentNode, map<string, string> &cameFrom) {
 
 //Funcion para hacer el sort
 bool sortQueue (Node a, Node b) { return (a.score < b.score); }
+
+/* void printCamefrom(map<string, string> &cameFrom) { */
+/* } */
 
 void aStarSearch(Matrix maze, short initialX, short initialY, short finalX, short finalY) {
     //Arreglos que vamos a utilizar
@@ -250,12 +255,14 @@ void aStarSearch(Matrix maze, short initialX, short initialY, short finalX, shor
     // Es 1 el costo para todos en nuestro caso
 
     while(!openSet.empty()) {
+        cout << "entramos aquí" << endl;
         // Sorteamos los nodos dependiendo del score
         sort(openSet.begin(), openSet.end(), sortQueue);
         Node currentNode = openSet.front();
 
         // Checamos si llegamos al goal
         if (currentNode.x == finalX && currentNode.y == finalY) {
+            cout << "entramos al goal" << endl;
             findPath(currentNode, cameFrom);
         }
 
@@ -263,6 +270,7 @@ void aStarSearch(Matrix maze, short initialX, short initialY, short finalX, shor
         openSet.erase(openSet.begin());
 
         expandNode(currentNode, openSet, closedSet, cameFrom, maze, finalX, finalY);
+        /* printCameFrom(cameFrom); */
     }
     cout << "End search" << endl;
 }
