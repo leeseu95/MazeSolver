@@ -83,7 +83,12 @@ void expandNode(Node currentNode, vector<Node> &openSet, vector<Node> &closedSet
                     break;
                 }
             }
-            if (!foundFlag) openSet.push_back(tempNode);
+            if (!foundFlag) {
+                openSet.push_back(tempNode);
+                string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                cameFrom[key] = value;
+            }
             else {
                 // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
                 // habíamos descubierto, lo actualizamos
@@ -118,7 +123,12 @@ void expandNode(Node currentNode, vector<Node> &openSet, vector<Node> &closedSet
                     break;
                 }
             }
-            if (!foundFlag) openSet.push_back(tempNode);
+            if (!foundFlag) {
+                openSet.push_back(tempNode);
+                string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                cameFrom[key] = value;
+            }
             else {
                 // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
                 // habíamos descubierto, lo actualizamos
@@ -153,7 +163,12 @@ void expandNode(Node currentNode, vector<Node> &openSet, vector<Node> &closedSet
                     break;
                 }
             }
-            if (!foundFlag) openSet.push_back(tempNode);
+            if (!foundFlag) {
+                openSet.push_back(tempNode);
+                string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                cameFrom[key] = value;
+            }
             else {
                 // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
                 // habíamos descubierto, lo actualizamos
@@ -188,15 +203,18 @@ void expandNode(Node currentNode, vector<Node> &openSet, vector<Node> &closedSet
                     break;
                 }
             }
-            if (!foundFlag) openSet.push_back(tempNode);
-            else {
-                // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
-                // habíamos descubierto, lo actualizamos
-                if (tempNode.score < openSet[index].score) {
-                    string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
-                    string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
-                    cameFrom[key] = value;
-                }
+            if (!foundFlag) {
+                openSet.push_back(tempNode);
+                string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                cameFrom[key] = value;
+            }
+            // Si no es un nuevo descubrimiento, pero tenemos mejor score que el que 
+            // habíamos descubierto, lo actualizamos
+            else if (tempNode.score < openSet[index].score) {
+                string key = to_string(tempNode.x) + "-" + to_string(tempNode.y);
+                string value = to_string(currentNode.x) + "-" + to_string(currentNode.y);
+                cameFrom[key] = value;
             }
         }
     }
@@ -205,16 +223,14 @@ void expandNode(Node currentNode, vector<Node> &openSet, vector<Node> &closedSet
 string findPath(Node currentNode, map<string, string> &cameFrom) {
     //Definicion de string temporal
     string key = to_string(currentNode.x) + "-" + to_string(currentNode.y);
-    cout << "key: " << key << endl;
+    string value = cameFrom[key];
     string path = "";
 
-    cout << "value: " << cameFrom[key] << endl;
-    cout << "cameFrom size" << cameFrom.size() << endl;
-    /* while (value != "START") { */
-    /*     path += value + "\n"; */
-    /*     key = value; */
-    /*     value = cameFrom[key]; */
-    /* } */
+    while (value != "START") {
+        path += value + "\n";
+        key = value;
+        value = cameFrom[key];
+    }
 
     cout << "path:" << endl;
     cout << path << endl;
@@ -255,14 +271,12 @@ void aStarSearch(Matrix maze, short initialX, short initialY, short finalX, shor
     // Es 1 el costo para todos en nuestro caso
 
     while(!openSet.empty()) {
-        cout << "entramos aquí" << endl;
         // Sorteamos los nodos dependiendo del score
         sort(openSet.begin(), openSet.end(), sortQueue);
         Node currentNode = openSet.front();
 
         // Checamos si llegamos al goal
         if (currentNode.x == finalX && currentNode.y == finalY) {
-            cout << "entramos al goal" << endl;
             findPath(currentNode, cameFrom);
         }
 
@@ -270,7 +284,6 @@ void aStarSearch(Matrix maze, short initialX, short initialY, short finalX, shor
         openSet.erase(openSet.begin());
 
         expandNode(currentNode, openSet, closedSet, cameFrom, maze, finalX, finalY);
-        /* printCameFrom(cameFrom); */
     }
     cout << "End search" << endl;
 }
